@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
+  f "fmt"
 	"strconv"
+	"sync"
 )
 
 func main() {
@@ -14,16 +15,24 @@ func main() {
 	}
 	close(numbers)
 
+	var wait sync.WaitGroup
+
 	for i := 0; i < 10; i++ {
+		wait.Add(1)
 		go func() {
+			defer wait.Done()
 			for num := range numbers {
 				strings <- strconv.Itoa(num)
 			}
 		}()
 	}
 
-	for i := 0; i < 10; i++ {
-		fmt.Println(<-strings)
+	go func() {
+		wait.Wait()
+		close(strings)
+	}()
+
+	for str := range strings {
+		f.Println(str)
 	}
-	close(strings)
 }
