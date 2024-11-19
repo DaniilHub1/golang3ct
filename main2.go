@@ -1,27 +1,29 @@
 package main
 
 import (
-  f "fmt"
+	"fmt"
 	"strconv"
 )
 
 func main() {
-	numbers := make(chan int, 10)  
+	numbers := make(chan int, 10)
 	strings := make(chan string, 10)
-	
+
 	for i := 0; i < 10; i++ {
 		numbers <- i
 	}
-	close(numbers) 
+	close(numbers)
 
-	go func() {
-		for num := range numbers { 
-			strings <- strconv.Itoa(num) 
-		}
-		close(strings) 
-	}()
-
-	for str := range strings {
-		f.Println(str)
+	for i := 0; i < 10; i++ {
+		go func() {
+			for num := range numbers {
+				strings <- strconv.Itoa(num)
+			}
+		}()
 	}
+
+	for i := 0; i < 10; i++ {
+		fmt.Println(<-strings)
+	}
+	close(strings)
 }
